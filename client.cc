@@ -63,7 +63,7 @@ int Client::JoinRoom(int rid) {
   msg->length2 = msg->length;
   send(sockfd_, msg, msg->length + 4, 0);
   recv(sockfd_, recv_msg, sizeof(Packet) + 1024, 0);
-  printf("login res: %s\n", recv_msg->data);
+  // printf("login res: %s\n", recv_msg->data);
 
   // join room
   n = sprintf(msg->data, "type@=joingroup/rid@=%d/gid@=-9999/", rid);
@@ -87,12 +87,18 @@ int Client::Watch(HandleFunc handle, void *arg) {
   pthread_create(&tid, NULL, KeepLive, this);
 
   const int max_data_len = 4096;
-  Packet *msg = (Packet *)malloc(sizeof(Packet)+max_data_len);
+	Packet *msg = (Packet *)malloc(sizeof(Packet)+max_data_len);
+	
 
   while (true) {
     recv(sockfd_, msg, sizeof(Packet), 0);
+		if (msg->length > max_data_len) {
+			continue;
+		}
+		// printf("msg->length:%d\n", msg->length);
     recv(sockfd_, msg->data, msg->length-12, 0);
     handle(arg, msg->data);
+		fflush(0);
   }
   free(msg);
   return 0;
@@ -104,7 +110,7 @@ void Client::Heartbeat() {
   msg->reserve = 0;
   msg->encrypt = 0;
   while (true) {
-    printf("heartbeat\n");
+    // printf("heartbeat\n");
     int n = sprintf(msg->data, "type@=keeplive/tick@=%d/", (int)time(NULL));
     msg->length = n + 1 + 8;
     msg->length2 = msg->length;

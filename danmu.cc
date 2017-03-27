@@ -7,22 +7,56 @@
 int MsgHandle(void * /*arg*/, void *msg) {
   char *s = (char*)msg;
   char *p, *q;
+	char gfid[10], txt[4096];
+	// printf("%s\n", s);
+	// chat
   if (strncmp(s, "type@=chatmsg", 13) == 0) {
     p = strstr(s, "nn@=");
     if (p) {
       p += 4;
       q = strchr(p, '/');
       *q++ = 0;
-      printf("<%s>:", p);
+      printf("%s", p);
       p = strstr(q, "txt@=");
       if (p) {
         p += 5;
         q = strchr(p, '/');
-        *q = 0;
-        printf(" %s\n", p);
+        *q++ = 0;
+        strncpy(txt, p, 4096);
       }
+    	p = strstr(q, "level@=");
+			if (p) {
+				p += 7;
+				q = strchr(p, '/');
+				*q = 0;
+				printf("#%s#%s\n", p, txt);
+			}
     }
   }
+  if (strncmp(s, "type@=dgb", 9) == 0) {
+		p = strstr(s, "gfid@=");
+		if (p) {
+			p += 6;
+			q = strchr(p, '/');
+			*q++ = 0;
+			strncpy(gfid, p, 10);
+			p = strstr(q, "nn@=");
+			if (p) {
+				p += 4;
+				q = strchr(p, '/');
+				*q++ = 0;
+				printf("%s", p);
+				p = strstr(q, "level@=");
+				if (p) {
+					p += 7;
+					q = strchr(p, '/');
+					*q = 0;
+					printf("#%s#@%s\n", p, gfid);
+				}
+			}
+		}
+  }
+
   return 0;
 }
 
